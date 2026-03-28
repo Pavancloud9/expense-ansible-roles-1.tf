@@ -1,0 +1,34 @@
+- name: Install libraries
+  ansible.builtin.pip:
+      name: "{{ item }}"
+      state: present
+  loop:
+  - PyMySQL
+  - cryptography
+  
+- name: install mysql-server
+  ansible.builtin.package:
+    name: mysql-server
+    state: installed
+
+- name: start and enable mysql-server
+  ansible.builtin.service:
+    name: mysqld
+    state: started
+    enabled: yes
+
+- name: connect to mysql using id and password
+  community.mysql.mysql_info:
+    login_user: root
+    login_password: "{{ lookup('amazon.aws.aws_ssm', '/expense/dev/mysql/mysql_root_password', decrypt=True) }}"
+    login_host: mysql.pavancloud5.online
+  register: MYSQL_OUTPUT
+  ignore_errors: true
+  
+- name: print mysql_output
+  ansible.builtin.debug:
+    msg: " {{ MYSQL_OUTPUT }}"
+
+- name: setup root password
+  ansible.builtin.command: mysql_secure_installation --set-root-pass ExpenseApp@1
+  when: MYSQL_OUTPUT.failed is true
