@@ -61,7 +61,7 @@
     name: all
     login_user: root
     login_password: ExpenseApp1
-    login_host: mysql.pavancloud5.online
+    login_host: "{{ MYSQL_HOST }}"
     target: /app/schema/backend.sql
 
 - name: daemon_reload restart
